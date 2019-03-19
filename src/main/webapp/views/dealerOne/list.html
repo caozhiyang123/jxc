@@ -1,0 +1,286 @@
+#@admin_layout()
+#define admin_main()
+<style type="text/css">
+    .layui-fixbar {
+        position: fixed;
+        right: 25px;
+        bottom: 65px;
+        z-index: 9999;
+    }
+
+    .layui-opacity {
+        opacity: 0.3;
+    }
+
+    .layui-opacity:hover {
+        opacity: 1;
+    }
+
+    .layui-table-page {
+        position: fixed;
+    }
+
+    .jxc-warn {
+        color: #FF5722
+    }
+
+    .dealer-table-edit {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        padding: 0 14px 1px;
+        border-radius: 0;
+        box-shadow: 1px 1px 20px rgba(0, 0, 0, .15);
+        border-color: #FF5722;
+    }
+
+</style>
+<style type="text/css">
+    td[data-edit=true], td[data-edit=true] input, td[data-edit=true]:hover {
+        background-color: #F0F9F2;
+    }
+</style>
+<div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief" style="margin-top: -10px">
+    <ul class="layui-tab-title">
+        <!--第一个开放期-->
+        #if(step ==1)
+        #if(role_name == "总部")
+        <li class="layui-this">待审核数据</li>
+        #if(show_import_order == "1")
+        <li>导入本月下单数</li>
+        #end
+        #end
+
+        #if(role_name == "大区经理")
+        #if(show_dtj_sj)
+        <li class="layui-this">待填写数据</li>
+        <li class="">待审核数据</li>
+        #end
+        #if(!show_dtj_sj)
+        <li class="layui-this">待审核数据</li>
+        #end
+        #end
+
+        #if(role_name == "商务经理")
+        <li class="layui-this">待填写数据</li>
+        #end
+        #end
+
+        <!--第二个开放期-->
+        #if(step ==2)
+        #if(role_name == "总部")
+        <li class="layui-this">所有数据</li>
+        <li class="">导入上月数据</li>
+        #if(show_import_order == "1")
+        <li>导入本月下单数</li>
+        #end
+        #end
+
+        #if(role_name == "大区经理")
+        <li class="layui-this">待审核数据</li>
+        #end
+
+        #if(role_name == "商务经理")
+        <li class="layui-this">所有数据</li>
+        #end
+        #end
+
+        <!--第三个开放期-->
+        #if(step ==3)
+        #if(role_name == "总部")
+        <li class="layui-this">所有数据</li>
+        #if(show_import_order == "1")
+        <li>导入本月下单数</li>
+        #end
+        #end
+
+        #if(role_name == "大区经理")
+        #if(show_dtj_sj)
+        <li class="layui-this">待填写数据</li>
+        <li class="">待审核数据</li>
+        #end
+        #if(!show_dtj_sj)
+        <li class="layui-this">待审核数据</li>
+        #end
+        #end
+
+        #if(role_name == "商务经理")
+        <li class="layui-this">待填写数据</li>
+        #end
+        #end
+
+        <!--第四个开放期-->
+        #if(step ==4)
+        #if(role_name == "总部")
+        <li class="layui-this">所有数据</li>
+        <li>下月采购量总量</li>
+        #if(show_import_order == "1")
+        <li>导入本月下单数</li>
+        #end
+        #end
+
+        #if(role_name == "大区经理")
+        <li class="layui-this">待审核数据</li>
+        #end
+
+        #if(role_name == "商务经理")
+        <li class="layui-this">所有数据</li>
+        #end
+        #end
+    </ul>
+
+    <div class="layui-tab-content" style="height: 100px;">
+        <!--第一个开放期-->
+        #if(step ==1)
+        #if(role_name == "总部")
+        <div class="layui-tab-item layui-show">
+            #include("ytjsj.html")
+        </div>
+        #if(show_import_order == "1")
+        <div class="layui-tab-item">
+            #include("import_order_num.html")
+        </div>
+        #end
+        #end
+
+        #if(role_name == "大区经理")
+        #if(show_dtj_sj)
+        <div class="layui-tab-item layui-show">
+            #include("dtxsj.html")
+        </div>
+        <div class="layui-tab-item">
+            #include("ytjsj.html")
+        </div>
+        #end
+        #if(!show_dtj_sj)
+        <div class="layui-tab-item layui-show">
+            #include("ytjsj.html")
+        </div>
+        #end
+        #end
+
+        #if(role_name == "商务经理")
+        <div class="layui-tab-item layui-show">
+            #include("ytjsj.html")
+        </div>
+        #end
+        #end
+
+        #if(step ==2)
+        #if(role_name == "总部")
+        <div class="layui-tab-item layui-show">
+            #include("ytjsj.html")
+        </div>
+        <div class="layui-tab-item">
+            #include("importLastMonthData.html")
+        </div>
+        #if(show_import_order == "1")
+        <div class="layui-tab-item">
+            #include("import_order_num.html")
+        </div>
+        #end
+        #end
+
+        #if(role_name == "大区经理")
+        <div class="layui-tab-item  layui-show">
+            #include("ytjsj.html")
+        </div>
+        #end
+
+        #if(role_name == "商务经理")
+        <div class="layui-tab-item  layui-show">
+            #include("ytjsj.html")
+        </div>
+        #end
+        #end
+
+        #if(step ==3)
+        #if(role_name == "总部")
+        <div class="layui-tab-item layui-show">
+            #include("ytjsj.html")
+        </div>
+        #if(show_import_order == "1")
+        <div class="layui-tab-item">
+            #include("import_order_num.html")
+        </div>
+        #end
+        #end
+
+        #if(role_name == "大区经理")
+        #if(show_dtj_sj)
+        <div class="layui-tab-item layui-show">
+            #include("dtxsj.html")
+        </div>
+        <div class="layui-tab-item">
+            #include("ytjsj.html")
+        </div>
+        #end
+        #if(!show_dtj_sj)
+        <div class="layui-tab-item layui-show">
+            #include("ytjsj.html")
+        </div>
+        #end
+        #end
+
+        #if(role_name == "商务经理")
+        <div class="layui-tab-item  layui-show">
+            #include("ytjsj.html")
+        </div>
+        #end
+        #end
+
+        #if(step ==4)
+        #if(role_name == "总部")
+        <div class="layui-tab-item layui-show">
+            #include("ytjsj.html")
+        </div>
+        <div class="layui-tab-item">
+            #include("xy_cg_zl.html")
+        </div>
+        #if(show_import_order == "1")
+        <div class="layui-tab-item">
+            #include("import_order_num.html")
+        </div>
+        #end
+        #end
+
+        #if(role_name == "大区经理")
+        <div class="layui-tab-item  layui-show">
+            #include("ytjsj.html")
+        </div>
+        #end
+
+        #if(role_name == "商务经理")
+        <div class="layui-tab-item  layui-show">
+            #include("ytjsj.html")
+        </div>
+        #end
+        #end
+    </div>
+</div>
+#end
+
+
+#define admin_script()
+<!--待审核数据的JS-->
+<input type="hidden" id="ctx" value="#(contextPath)"/>
+<input type="hidden" id="month" value="#(month)"/>
+<input type="hidden" id="role_name" value="#(role_name)"/>
+<input type="hidden" id="l_month" value="#(l_month)"/>
+<input type="hidden" id="ll_month" value="#(ll_month)"/>
+<input type="hidden" id="canEdit_dtx" value="#(canEdit_dtx)"/>
+<input type="hidden" id="canEdit" value="#(canEdit)"/>
+<input type="hidden" id="product_purpose_status" value="#(product_purpose_status)"/>
+<input type="hidden" id="area_code" value="#(area_code)"/>
+<input type="hidden" id="next_month" value="#(next_month)"/>
+
+#if(show_dtj_sj)
+<script src="#(contextPath)/views/dealerOne/js/dtx.js"></script>
+#end
+<script src="#(contextPath)/views/dealerOne/js/ytj.js"></script>
+<script src="#(contextPath)/views/dealerOne/js/xy_cg_zl.js"></script>
+<script src="#(contextPath)/views/dealerOne/js/import_last_month_data.js"></script>
+<script src="#(contextPath)/views/dealerOne/js/import_order_num.js"></script>
+#end

@@ -1,0 +1,615 @@
+#@admin_layout()
+#define admin_main()
+<div class="container">
+    <form class="layui-form">
+        <div class="public-search">
+            <div class="layui-input-inline">
+                <label class="layui-form-label">大区</label>
+                <div class="layui-input-block" style="width: 200px;">
+                    <select id="area" name="area" xm-select="area_select" xm-select-height="36px" xm-select-show-count="1">
+                    </select>
+                </div>
+            </div>
+            <div class="layui-input-inline">
+                <label class="layui-form-label">省份</label>
+                <div class="layui-input-block" style="width: 200px;">
+                    <select id="region" name="region" lay-verify="required" xm-select="region_select" xm-select-height="36px" xm-select-search="" xm-select-show-count="1">
+                    </select>
+                </div>
+            </div>
+            #if(roleName != '商务经理')
+            <div class="layui-input-inline">
+                <label class="layui-form-label">商务经理</label>
+                <div class="layui-input-block" style="width: 200px;">
+                    <select name="business_user" lay-verify="required" xm-select="business_user_select" xm-select-search="" xm-select-show-count="1"
+                            xm-select-height="36px">
+                    </select>
+                </div>
+            </div>
+            #end
+            <div class="layui-input-inline">
+                <label class="layui-form-label">经销商</label>
+                <div class="layui-input-block" style="width: 200px;">
+                    <select id="dealer" name="dealer" lay-verify="required" xm-select="dealer_select" xm-select-height="36px" xm-select-search="" >
+                    </select>
+                </div>
+            </div>
+            <div class="layui-input-inline">
+                <label class="layui-form-label">经销商等级</label>
+                <div class="layui-input-block" style="width: 200px;">
+                    <select id="dealer_level" name="dealer_level" lay-verify="required" xm-select="dealer_level_select" xm-select-height="36px">
+                    </select>
+                </div>
+            </div>
+            <div class="layui-input-inline">
+                <label class="layui-form-label">产品</label>
+                <div class="layui-input-block" style="width: 200px;">
+                    <select id="product" name="product" xm-select="product_select" xm-select-height="36px" xm-select-show-count="1">
+                    </select>
+                </div>
+            </div>
+            <div class="layui-input-inline">
+                <label class="layui-form-label">类型</label>
+                <div class="layui-input-block" style="width: 200px;">
+                    <select id="column" name="column" lay-verify="required" xm-select="column_select" xm-select-height="36px" xm-select-show-count="1">
+                        <option></option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-input-inline">
+                <label class="layui-form-label">时间</label>
+                <div class="layui-input-block" style="width: 200px;">
+                    <input type="text" class="layui-input" id="month" placeholder=" - " value="#(month)">
+                </div>
+            </div>
+            <button class="layui-btn" id="search" type="button">搜索</button>
+            <button type="button" class="layui-btn" id="export">导出</button>
+        </div>
+    </form>
+</div>
+<div style="float: left;margin-top: 20px;" id="history-div">
+    <table lay-filter="historyTable" id="historyTable">
+    </table>
+</div>
+
+
+
+#end
+
+<script type="text/javascript">
+   var areaSelectedBak = [];
+   var regionSelectedBak = [];
+   var businessUserSelectedBak = [];
+   var dealerSelectedBak = [];
+   var dealerLevelSelectedBak = [];
+   
+   var areaSelectedObj = {};
+   var regionSelectedObj = {};
+   var businessUserSelectedObj = {};
+   var dealerSelectedObj = {};
+   var dealerLevelSelectedObj = {};  
+
+    var formSelects = layui.formSelects;
+    //表格配置
+    function getTableConfig() {
+        return {
+            elem: '#historyTable',
+                url: '#(contextPath)/dealerHistory/list',
+                cols: [[
+                    {field: 'dealer_name', title: '经销商名称', width: 300}
+                    , {field: 'dealer_level', title: '经销商级别', width: 100}
+                    , {field: 'area_name', title: '大区', width: 90}
+                    , {field: 'region_name', title: '省份', width: 90}
+                    , {field: 'business_manager_user_name', title: '商务负责人', width: 100}
+                    , {field: 'product_name', title: '产品名称', width: 100}
+                    , {field: 'type', title: '类型', width: 100}
+                ]],
+                loading: true,
+                page: true,
+                width: $(window).width() - $(".layui-side").width() - 35,
+                limit: 100,
+                limits: [50, 100, 150, 200],
+                height: 'full-380',
+                where: {
+                product_id: ""
+            }
+        };
+    }
+
+    //初始化函数
+    $(function () {
+        //初始加载大区信息
+        setAreaSelect();
+        //初始加载商务经理信息
+        if ('roleName' != "商务经理") {
+            setBusinessManagerSelect("","","");
+        }
+        //初始加载经销商信息
+        setDealerSelect("","","","");
+        //初始加载经销商等级信息
+        setDealerLevelSelect();
+        //初始加载产品信息
+        setProductSelect();
+        //初始加载类型信息
+        setColumnSelect();
+
+        $("#export").click(function () {
+            var url = "area_id=" + layui.formSelects.value('area_select', 'valStr')
+                + "&region_id=" + layui.formSelects.value('region_select', 'valStr')
+                + "&business_manager_user_id=" + layui.formSelects.value('business_user_select', 'valStr')
+                + "&dealer_id=" + layui.formSelects.value('dealer_select', 'valStr')
+                + "&dealer_level=" + layui.formSelects.value('dealer_level_select', 'valStr')
+                + "&product_id=" + layui.formSelects.value('product_select', 'valStr')
+                + "&column=" + layui.formSelects.value('column_select', 'valStr')
+                + "&month=" + $("#month").val();
+            window.location.href = '#(contextPath)/dealerHistory/exportHistory?' + url;
+        });
+    });
+
+    layui.use(['form', 'layedit', 'table', 'laydate'], function () {
+        var form = layui.form, laydate = layui.laydate; //只有执行了这一步，部分表单元素才会自动修饰成功
+        //初始化年月范围
+        laydate.render({
+            elem: '#month'
+            ,type: 'month'
+            ,range: true
+        });
+
+        var dealerTable;
+        //搜索按钮事件
+        $("#search").click(function () {
+            var tableConfig = getTableConfig();
+            setTableConfig(tableConfig);
+            if (!tableConfig.where.product_id) {
+                showTips("请选择产品", 1000);
+                return;
+            }
+            if (!tableConfig.where.column) {
+                showTips("请选择类型", 1000);
+                return;
+            }
+            if (!tableConfig.where.month) {
+                showTips("请选择时间", 1000);
+                return;
+            }
+
+            if (dealerTable) {
+                dealerTable = reloadTable("historyTable", tableConfig);
+                return;
+            }
+            var rows = layui.formSelects.value('column_select', 'val');
+            renderTable(tableConfig, '', function (res, curr, count) {
+                combinedRow($("#history-div").find("table tbody"), rows.length, [0,1,2,3,4]);
+            });
+        });
+
+    });
+
+    function setTableConfig(tableConfig) {
+        tableConfig.where.area_id = layui.formSelects.value('area_select', 'valStr');
+        tableConfig.where.region_id = layui.formSelects.value('region_select', 'valStr');
+        tableConfig.where.business_manager_user_id = layui.formSelects.value('business_user_select', 'valStr');
+        tableConfig.where.dealer_id = layui.formSelects.value('dealer_select', 'valStr');
+        tableConfig.where.dealer_level = layui.formSelects.value('dealer_level_select', 'valStr');
+        tableConfig.where.product_id = layui.formSelects.value('product_select', 'valStr');
+        tableConfig.where.column = layui.formSelects.value('column_select', 'valStr');
+        tableConfig.where.month = $("#month").val();
+
+        //设置列信息
+        var monthRange = $("#month").val();
+        var months = monthRange.split(" - ");
+        var columns = getDiffMonth(months[0], months[1]);
+        var cols = tableConfig.cols;
+        for (var i = 0; i < columns.length; i++) {
+            cols[0].push({field: columns[i], title: columns[i], width: 100});
+        }
+    }
+
+    //加载大区信息
+    function setAreaSelect() {
+        formSelects.btns('area_select', []);
+        //赋值大区下拉宽
+        formSelects.data('area_select', "server", {
+            url: '#(contextPath)/dealerHistory/getAreaList',
+            keyName: 'name',
+            keyVal: "id"
+        });
+    }
+
+    //加载省份下拉宽，保持和大区联动
+    function setRegionSelect(area) {
+        formSelects.btns('region_select', []);
+        formSelects.render('region_select');
+        if (area.length != 0) {
+            formSelects.data('region_select', "server", {
+                url: '#(contextPath)/dealerHistory/getRegionList?area_ids=' + area,
+                keyName: 'name',
+                keyVal: "id",
+                success: function (id, url, searchVal, result) {
+                    if (result)
+                    {
+                        result = result.data;
+                        regionSelectedBak = [];
+                        
+                        $.each(result, function (index, item) {
+                            if (regionSelectedObj[item.id])
+                            {
+                                regionSelectedBak.push(item.id);
+                            }
+                        });
+                        
+                        layui.formSelects.value('region_select', regionSelectedBak);    
+                        
+                        regionSelectedObj = {};
+                        $.each(regionSelectedBak, function (i, ele) {
+                            regionSelectedObj[ele] = ele;
+                        });
+                    }
+                }
+            });
+        } else {
+            formSelects.data('region_select', 'local', {
+                arr: []
+            });
+        }
+    }
+
+    //赋值商务经理下拉宽
+    function setBusinessManagerSelect(area,regionIds,dealerIds) {
+        formSelects.data('business_user_select', "server", {
+            url: '#(contextPath)/dealerHistory/getBusinessManagerList?isSelf=true&area_ids=' + area + '&region_ids=' + regionIds + '&dealer_ids=' + dealerIds,
+            keyName: 'name',
+            keyVal: "id",
+            beforeSuccess: function (id, url, searchVal, result) {
+                result = result.data;
+                $.each(result, function (index, item) {
+                    item.name && (item.name = item.name.split('').join(''));
+                });
+                if (result.length == 0) {
+                    return result;
+                }
+                return result;
+            },
+            success: function (id, url, searchVal, result) {
+                if (result)
+                {
+                    result = result.data;
+                    businessUserSelectedBak = [];
+                    
+                    $.each(result, function (index, item) {
+                        if (businessUserSelectedObj[item.id])
+                        {
+                        	businessUserSelectedBak.push(item.id);
+                        }
+                    });
+                    
+                    layui.formSelects.value('business_user_select', businessUserSelectedBak);    
+                    
+                    businessUserSelectedObj = {};
+                    $.each(businessUserSelectedBak, function (i, ele) {
+                    	businessUserSelectedObj[ele] = ele;
+                    });
+                }
+            }
+        });
+    }
+
+    //加载经销商下拉宽
+    function setDealerSelect(area,levels,regionIds,businessIds) {
+    	
+    	if (levels.indexOf(",") != -1)
+    	{
+    		levels = "";
+    	}
+    	
+        //赋值大区下拉宽
+        formSelects.data('dealer_select', "server", {
+            url: '#(contextPath)/dealerHistory/getDealerList?area_ids=' + area + '&levels=' + levels + '&region_ids=' + regionIds + '&business_ids=' + businessIds,
+            keyName: 'name',
+            keyVal: "id",
+            success: function (id, url, searchVal, result) {
+            	if (result)
+            	{
+                    result = result.data;
+                    dealerSelectedBak = [];
+                    
+                    $.each(result, function (index, item) {
+                        if (dealerSelectedObj[item.id])
+                        {
+                        	dealerSelectedBak.push(item.id);
+                        }
+                    });
+                    
+                    layui.formSelects.value('dealer_select', dealerSelectedBak);    
+                    
+                    dealerSelectedObj = {};
+                    $.each(dealerSelectedBak, function (i, ele) {
+                    	dealerSelectedObj[ele] = ele;
+                    });
+            	}
+            }
+        });
+    }
+
+    //加载经销商等级下拉宽
+    function setDealerLevelSelect() {
+        formSelects.btns('dealer_level_select', []);
+        //赋值类型下拉宽
+        formSelects.data('dealer_level_select', "local", {
+            arr: [
+                {value: 1, name: 'T1'},
+                {value: 2, name: 'T2'}
+            ]
+        });
+    }
+
+    //加载产品下拉宽
+    function setProductSelect(afterRender) {
+        formSelects.data('product_select', "server", {
+            url: '#(contextPath)/dealerHistory/getProductList?isSelf=true',
+            keyName: 'name',
+            keyVal: "id",
+            beforeSuccess: function (id, url, searchVal, result) {
+                result = result.data;
+                $.each(result, function (index, item) {
+                    item.name && (item.name = item.name.split('').join(''))
+                });
+                if (result.length == 0) {
+                    return result;
+                }
+                layui.formSelects.value('product_select', [result[0].id]);
+                return result;
+            },
+            success: function (id, url, val, result) {
+                if (typeof afterRender != 'undefined' && typeof afterRender == 'function') {
+                    afterRender();
+                }
+            }
+        });
+    }
+
+    //加载类型下拉宽
+    function setColumnSelect() {
+        //赋值类型下拉宽
+        formSelects.data('column_select', "local", {
+            arr: [
+                {value: 'plan_purchase_quantity', name: '月预估进货', selected: 'selected'},
+                {value: 'actual_purchase_quantity', name: '月实际进货'},
+                {value: 'plan_sales_quantity', name: '月销售预估'},
+                {value: 'actual_sales_quantity', name: '月实际销售'},
+                {value: 'actual_sales_quantity_head_office', name: '月总部上传实际销售'},
+                {value: 'theory_stock_quantity', name: '月理论库存'},
+                {value: 'actual_stock_quantity', name: '月实际库存'},
+                {value: 'inventory_day', name: '月库存天数'},
+                {value: 'diff_cause', name: '库存差异原因'}
+            ]
+        });
+    }
+
+    //大区下拉事件监听，去取省份的值
+    formSelects.on('area_select', function (id, vals, val, isAdd, isDisabled) {
+        if (val == undefined) {
+            return false;
+        }
+        
+        var area = "";
+        if (isAdd) {
+            $.each(vals, function (index, val) {
+                area = area + val.val + ",";
+                areaSelectedObj[val.val] = val.val;
+                areaSelectedBak.push(val.val);
+            });
+            area = area + val.val;
+            areaSelectedObj[val.val] = val.val;
+            areaSelectedBak.push(val.val);
+        } else {
+            $.each(vals, function (index, thisVal) {
+                if (thisVal.val != val.val) {
+                    area = area + thisVal.val + ",";
+                    areaSelectedObj[thisVal.val] = thisVal.val;
+                    areaSelectedBak.push(thisVal.val);
+                }            
+                else
+                {
+                    areaSelectedObj[thisVal.val] = null;
+                    areaSelectedBak.splice($.inArray(thisVal.val,areaSelectedBak),1);
+                }
+            });
+        }
+        setRegionSelect(area);
+        //初始加载商务经理信息
+        if ('roleName' != "商务经理") {
+            setBusinessManagerSelect(area,regionSelectedBak.join(","),dealerSelectedBak.join(","));
+        }
+        
+        //初始加载经销商信息
+        setDealerSelect(areaSelectedBak.join(","),layui.formSelects.value('dealer_level_select', 'valStr'),regionSelectedBak.join(","),businessUserSelectedBak.join(","));
+    });
+    
+  //大区下拉事件监听，去取省份的值
+    formSelects.on('region_select', function (id, vals, val, isAdd, isDisabled) {
+        if (val == undefined) {
+            return false;
+        }
+        var region = "";
+        if (isAdd) {
+            $.each(vals, function (index, val) {
+                region = region + val.val + ",";
+                regionSelectedObj[val.val] = val.val;
+                regionSelectedBak.push(val.val);
+            })
+            region = region + val.val;
+            regionSelectedObj[val.val] = val.val;
+            regionSelectedBak.push(val.val);
+        } else {
+            $.each(vals, function (index, thisVal) {
+                if (thisVal.val != val.val) {
+                    region = region + thisVal.val + ",";
+                    regionSelectedObj[thisVal.val] = thisVal.val;
+                    regionSelectedBak.push(thisVal.val);
+                }
+                else
+                {
+                    regionSelectedObj[thisVal.val] = null;
+                    regionSelectedBak.splice($.inArray(thisVal.val,regionSelectedBak),1);
+                }
+            })
+        }
+        
+        //初始加载商务经理信息
+        if ('roleName' != "商务经理") {
+            setBusinessManagerSelect(areaSelectedBak.join(","),regionSelectedBak.join(","),dealerSelectedBak.join(","));
+        }
+        
+        //初始加载经销商信息
+        setDealerSelect(areaSelectedBak.join(","),layui.formSelects.value('dealer_level_select', 'valStr'),regionSelectedBak.join(","),businessUserSelectedBak.join(","));
+    });
+    
+    //经销商等级选择事件
+    formSelects.on('dealer_level_select', function (id, vals, val, isAdd, isDisabled) {
+        if (val == undefined) {
+            return false;
+        }
+        var levels = "";
+        if (isAdd) {
+            $.each(vals, function (index, val) {
+            	levels = levels + val.val + ",";
+            });
+            levels = levels + val.val;
+        } else {
+            $.each(vals, function (index, thisVal) {
+                if (thisVal.val != val.val) {
+                	levels = levels + thisVal.val + ",";
+                }
+            });
+        }
+        
+        //初始加载经销商信息
+        setDealerSelect(areaSelectedBak.join(","),levels,regionSelectedBak.join(","),businessUserSelectedBak.join(","));
+    });  
+    
+    formSelects.on('dealer_select', function (id, vals, val, isAdd, isDisabled) {
+        if (val == undefined) {
+            return false;
+        }   
+        
+        if (isAdd) {
+            $.each(vals, function (index, val) {
+                dealerSelectedObj[val.val] = val.val;
+                dealerSelectedBak.push(val.val);
+            });
+            dealerSelectedObj[val.val] = val.val;
+            dealerSelectedBak.push(val.val);
+        } else {
+            $.each(vals, function (index, thisVal) {
+                if (thisVal.val != val.val) {
+                    dealerSelectedObj[thisVal.val] = thisVal.val;
+                    dealerSelectedBak.push(thisVal.val);
+                }            
+                else
+                {
+                    dealerSelectedObj[thisVal.val] = null;
+                    dealerSelectedBak.splice($.inArray(thisVal.val,dealerSelectedBak),1);
+                }
+            });
+        }
+        
+        if ('roleName' != "商务经理") {
+            setBusinessManagerSelect(areaSelectedBak.join(","),regionSelectedBak.join(","),dealerSelectedBak.join(","));
+        }
+    });   
+    
+    formSelects.on('business_user_select', function (id, vals, val, isAdd, isDisabled) {
+        
+        if (val == undefined) {
+            return false;
+        }   
+        
+        if (isAdd) {
+            $.each(vals, function (index, val) {
+            	businessUserSelectedObj[val.val] = val.val;
+                businessUserSelectedBak.push(val.val);
+            });
+            businessUserSelectedObj[val.val] = val.val;
+            businessUserSelectedBak.push(val.val);
+        } else {
+            $.each(vals, function (index, thisVal) {
+                if (thisVal.val != val.val) {
+                	businessUserSelectedObj[thisVal.val] = thisVal.val;
+                    businessUserSelectedBak.push(thisVal.val);
+                }
+                else
+                {
+                    businessUserSelectedObj[thisVal.val] = null;
+                    businessUserSelectedBak.splice($.inArray(thisVal.val,businessUserSelectedBak),1);
+                }
+            });
+        }
+        
+        //初始加载经销商信息
+        setDealerSelect(areaSelectedBak.join(","),layui.formSelects.value('dealer_level_select', 'valStr'),regionSelectedBak.join(","),businessUserSelectedBak.join(","));
+    });   
+
+    function getDiffMonth(startDate, endDate) {
+        var months = [];
+        startDate = new Date(startDate + "-01");
+        endDate = new Date(endDate + "-01");
+        var startMonth = startDate.getMonth();
+        var endMonth = endDate.getMonth();
+        var intervalMonth = (endDate.getFullYear()*12+endMonth) - (startDate.getFullYear()*12+startMonth);
+        months.push(startDate.add("m", 0).Format("yyyyMM"));
+        for (var i = 0; i < intervalMonth; i++) {
+            months.push(startDate.add("m", 1).Format("yyyyMM"));
+        }
+        return months;
+    }
+
+    /**
+     *js中更改日期
+     * y年， m月， d日， h小时， n分钟，s秒
+     */
+    Date.prototype.addMonth = function (part, value) {
+        value *= 1;
+        if (isNaN(value)) {
+            value = 0;
+        }
+        return new Date(this.setMonth(this.getMonth() + value)).Format("yyyyMM");
+    };
+
+    Date.prototype.Format = function (fmt) {
+        var o = {
+            "M+": this.getMonth() + 1, //月份
+            "d+": this.getDate(), //日
+            "h+": this.getHours(), //小时
+            "m+": this.getMinutes(), //分
+            "s+": this.getSeconds(), //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+            "S": this.getMilliseconds() //毫秒
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt))
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    };
+
+    //合并单元格
+    /**
+     *
+     * @param elem
+     * @param combined 合并几行
+     * @param cols 哪几列合并
+     */
+    function combinedRow(elem, combined, cols) {
+        elem.find('tr').each(function(index, row) {
+            for (var i = 0; i < cols.length; i++) {
+                if (index%combined == 0) {
+                    $(row).find("td:eq(" + cols[i] + ")").attr("rowspan", combined);
+                } else {
+                    $(row).find("td:eq(0)").remove();
+                }
+            }
+        });
+    }
+</script>

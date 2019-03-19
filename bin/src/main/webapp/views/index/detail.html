@@ -1,0 +1,23 @@
+#@layout()
+#define main()
+<div class="layui-panal">
+    <div class="layui-panal-content">
+        <h1>#(blog.title??)</h1>
+        <div class="layui-info">
+            <span><i class="iconfont icon-zuozhe"></i>admin</span>
+            <span><i class="iconfont icon-category"></i>#(blog.category??)</span>
+            <span><i class="iconfont icon-riqi"></i><label>#(blog.create_time??)</label></span>
+            <span><i class="iconfont icon-liulan"></i>#(uv??)</span>
+        </div>
+        <hr class="layui-bg-black">
+        <div class="layui-article-detail-content">
+            <blockquote class="layui-elem-quote">
+                #(blog.disc??)
+            </blockquote>
+            <div id="showContent">
+                <p>#(blog.content??)</p>
+            </div>
+        </div>
+    </div>
+</div>
+#end

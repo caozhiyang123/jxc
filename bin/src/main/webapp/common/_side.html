@@ -1,0 +1,64 @@
+#define side()
+<div class="layui-panal">
+    <div class="layui-panal-title  layui-otherpanal-title">
+        <span>近期文章</span>
+    </div>
+    <div class="layui-panal-content">
+        <ul class="layui-ul">
+            #for(x:b)
+            <li>
+                <a title="#(x.title)" href="/detail/#(x.id)"> #(x.title)</a>
+            </li>
+            #end
+        </ul>
+    </div>
+</div>
+<div class="layui-panal">
+    <div class="layui-panal-title  layui-otherpanal-title">
+        <span>阅读排行榜</span>
+    </div>
+    <div class="layui-panal-content">
+        <ul class="hotUl">
+            #for(x:h)
+            <li>
+                <em>#(for.index + 1)</em><a href="/detail/#(x.id)">#(x.title)</a>
+                <b><i class="iconfont icon-liulan"></i><span>#(x.uv)</span></b>
+            </li>
+            #end
+        </ul>
+    </div>
+</div>
+<div class="layui-panal">
+    <div class="layui-panal-title  layui-otherpanal-title">
+        <span>精华推荐</span>
+    </div>
+    <div class="layui-panal-content">
+        <div class="layui-Essence">
+            #for(x:b)
+            <a title="#(x.title)" href="/detail/#(x.id)">
+                <div class="layui-row layui-col-space10">
+                    <div class="layui-col-md4 layui-col-xs4">
+                        <img lay-src="/img/201712301940328543.png"alt="#(x.title)" title="#(x.title)">
+                    </div>
+                    <div class="layui-col-md8 layui-col-xs8">
+                        #(x.title)
+                    </div>
+                </div>
+            </a>
+            #end
+        </div>
+    </div>
+</div>
+<div class="layui-panal">
+    <div class="layui-panal-title  layui-otherpanal-title">
+        <span>标签云</span>
+    </div>
+    <div class="layui-panal-content">
+        <div class="layui-Special">
+            #for(x:s)
+            <a target="_blank" href="/detail">#(x.name)<span class="layui-badge">9</span></a>
+            #end
+        </div>
+    </div>
+</div>
+#end

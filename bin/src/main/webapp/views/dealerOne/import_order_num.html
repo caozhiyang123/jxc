@@ -1,0 +1,26 @@
+<div style="margin: 10px">
+    <h1>导入本月下单数</h1>
+    <span style="color: #FF5722">第一步：如果没有模版，请点击下载模版，并按照规定好的表头进行填写数据</span>
+    <a class="layui-btn layui-btn-danger" href="#(contextPath)/download/orderData.xlsx">点我下载模版</a>
+    <hr class="layui-bg-green">
+
+
+    <span style="color: #009688">第二步：填好数据之后请点击上传EXCEL文件</span>
+    <button type="button" class="layui-btn" id="upload_order_num">
+        <i class="layui-icon">&#xe67c;</i>上传EXCEL
+    </button>
+
+    <hr class="layui-bg-green">
+
+    <span style="color: #009688">第三步：上传成功之后，下面会有信息提示</span>
+
+    <hr class="layui-bg-green">
+    <span style="color: #009688">第四步：查看上传结果是否有误</span>
+    <fieldset class="layui-elem-field layui-field-title">
+        <div style="height: 200px;overflow-y: scroll">
+            <div style="color: red">错误信息：<br/>
+                <div style="margin-left: 20px" id="err_order">无错误信息!</div>
+            </div>
+        </div>
+    </fieldset>
+</div>

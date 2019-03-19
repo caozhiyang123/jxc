@@ -1,0 +1,108 @@
+#@admin_layout()
+#define admin_main()
+<div class="container">
+    <div class="layui-btn-group demoTable">
+        <button class="layui-btn" data-type="add">新增</button>
+    </div>
+
+    <div class="public-search">
+        <div class="layui-input-inline">
+            <label class="layui-form-label">时间</label>
+            <div class="layui-input-block" style="width: 200px;">
+                <input type="text" class="layui-input" id="date" placeholder=" - ">
+            </div>
+        </div>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" name="keyWords" id="keyWords" lay-verify=""
+                   placeholder="标题">
+        </div>
+        <a class="layui-btn" id="search">搜索</a>
+    </div>
+</div>
+
+<table class="layui-hide" id="test" lay-filter="demo"></table>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+#end
+
+
+#define admin_script()
+<script type="text/javascript">
+    layui.use(['table', 'laydate' ], function () {
+        var table = layui.table,laydate = layui.laydate;
+        //初始化年月范围
+        laydate.render({
+            elem: '#date'
+            ,type: 'date'
+            ,range: true
+        });
+
+        table.render({
+            elem: '#test'
+            , url: '#(contextPath)/sendEmail/list'
+            , cellMinWidth: 80
+            , cols: [[
+                {field: 'id', title: 'ID'}
+                , {field: 'subject', title: '邮件主题'}
+                , {field: 'content', title: '邮件内容'}
+                , {field: 'send_time', title: '发送时间'}
+                , {field: 'create_time', title: '创建时间'}
+                , {field: 'create_user_name', title: '创建人'}
+                , {field: 'status_name', title: '发送状态'}
+                , {title: '操作', toolbar: '#barDemo'}
+            ]]
+            , page: true
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(demo)', function (obj) {
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    $.getRemoteDate("#(contextPath)/sendEmail/delete", {id: data.id}, function (data) {
+                        obj.del();
+                        layer.close(index);
+                        table.reload("test", {
+                            where: {
+                                'search': $("#keyWords").val(),
+                                'date': $("#date").val(),
+                                'sort': 'send_time',
+                                'order': 'desc'
+                            }
+                        });
+                    });
+                });
+            } else if (obj.event === 'edit') {
+                window.location.href = "#(contextPath)/sendEmail/edit?id=" + data.id;
+            }
+        });
+
+        $("#search").click(function () {
+            table.reload("test", {
+                where: {
+                    'search': $("#keyWords").val(),
+                    'date': $("#date").val(),
+                    'sort': 'send_time',
+                    'order': 'desc'
+                }
+            });
+        });
+
+        var $$ = layui.$, active = {
+            add: function () { //获取选中数据
+                location.href = "#(contextPath)/sendEmail/add";
+            }
+        };
+
+        $$('.demoTable .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+#end

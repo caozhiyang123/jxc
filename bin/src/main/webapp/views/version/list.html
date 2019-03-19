@@ -1,0 +1,78 @@
+#@admin_layout()
+#define admin_main()
+<div class="container">
+    <form class="layui-form">
+        <div class="public-search">
+            <div class="layui-input-inline">
+                <label class="layui-form-label">年月范围</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" id="date" placeholder=" - " value="#(date)">
+                </div>
+            </div>
+            <button class="layui-btn" id="search" type="button">搜索</button>
+        </div>
+    </form>
+</div>
+<div style="float: left;margin-top: 20px;" id="edit-div">
+    <table lay-filter="versionTable" id="versionTable">
+    </table>
+</div>
+#end
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="export">导出</a>
+</script>
+
+<script type="text/html" id="statusTpl">
+        <span class="layui-badge {{d.status=='0'?'layui-bg-green':''}}">{{d.status=='0'?'任务执行成功':'任务执行失败'}}</span>
+</script>
+
+<script type="text/javascript">
+    //表格配置
+    var tableConfig = {
+        elem: '#versionTable',
+        url: '#(contextPath)/version/list',
+        cols: [[
+            {field: 'version', title: '版本号', width: 200}
+            , {field: 'status_name', title: '状态', width: 200, templet: '#statusTpl'}
+            , {field: 'create_time', title: '创建时间', width: 200}
+            , {title: '操作', toolbar: '#barDemo'}
+        ]],
+        loading: true,
+        page: true,
+        width: $(window).width() - $(".layui-side").width() - 35,
+        limit: 200,
+        limits: [50, 100, 150, 200],
+        height: 'full-380',
+        where: {}
+    };
+
+    layui.use(['form', 'table', 'laydate'], function () {
+        var form = layui.form, laydate = layui.laydate; //只有执行了这一步，部分表单元素才会自动修饰成功
+        //初始化年月范围
+        laydate.render({
+            elem: '#date'
+            ,type: 'date'
+            ,range: true
+        });
+        setTableConfig(tableConfig);
+        var versionTable = renderTable(tableConfig, '');
+        //搜索按钮事件
+        $("#search").click(function () {
+            setTableConfig(tableConfig);
+            versionTable = reloadTable("versionTable", tableConfig);
+        });
+
+        //监听工具条
+        layui.table.on('tool(versionTable)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'export') {
+                window.location.href = '#(contextPath)/version/export?version=' + data.version;
+            }
+        });
+    });
+
+    function setTableConfig(tableConfig) {
+        tableConfig.where.date = $("#date").val();
+    }
+</script>

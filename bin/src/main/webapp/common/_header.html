@@ -1,0 +1,19 @@
+#define header()
+<div class="layui-header header header-index">
+    <div class="layui-main">
+        <a class="logo" title="博客" href="/">
+            <img src="/img/logo.png" alt="layui">
+        </a>
+        <ul class="layui-nav" lay-filter="">
+            <li class="layui-nav-item layui-hide-xs index">
+                <a href="/admin">管理</a>
+            </li>
+            #for(x:c)
+            <li class="layui-nav-item layui-hide-xs index">
+                <a href="/">#(x.name)</a>
+            </li>
+            #end
+        </ul>
+    </div>
+</div>
+#end

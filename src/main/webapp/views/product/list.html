@@ -1,0 +1,85 @@
+#@admin_layout()
+#define admin_main()
+<div class="container">
+    <div class="layui-btn-group demoTable">
+        <button class="layui-btn" data-type="add">新增</button>
+    </div>
+    <div class="public-search">
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" name="keyWords" id="keyWords" lay-verify=""
+                   placeholder="名称">
+        </div>
+        <a class="layui-btn" id="search">搜索</a>
+    </div>
+</div>
+
+<table class="layui-hide" id="test" lay-filter="demo"></table>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+#end
+
+#define admin_script()
+<script type="text/javascript">
+    layui.use('table', function () {
+        var table = layui.table;
+
+        table.render({
+            elem: '#test'
+            , url: '#(contextPath)/product/list'
+            , cellMinWidth: 80
+            , cols: [[
+                // {field: 'id', title: 'ID', sort: true}
+                {field: 'name', title: '产品名称'}
+                , {field: 'project_name', title: '项目名称'}
+                , {field: 'create_user_name', title: '创建人'}
+                , {field: 'create_time', title: '创建时间', sort: true}
+                , {title: '操作', toolbar: '#barDemo'}
+            ]]
+            , page: true
+        });
+
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                location.href = "#(contextPath)/product/detail?id=" + data.id;
+            } else if (obj.event === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    $.getRemoteDate("#(contextPath)/product/delete?id=" + data.id, {}, function (data) {
+                        obj.del();
+                        layer.close(index);
+                        layer.msg("删除成功!!!", {time: 1000})
+                    }, function (err) {
+                        layer.msg("删除失败,失败原因：" + err.message, {time: 3000});
+                    })
+                }, true);
+            } else if (obj.event === 'edit') {
+                location.href = "#(contextPath)/product/edit?id=" + data.id;
+            }
+        });
+
+        $("#search").click(function () {
+            table.reload("test", {
+                where: {
+                    'search': $("#keyWords").val(),
+                    'sort': 'store_open_time',
+                    'order': 'desc'
+                }
+            });
+        });
+
+        var $$ = layui.$, active = {
+            add: function () { //获取选中数据
+                location.href = "#(contextPath)/product/add";
+            }
+        };
+
+        $$('.demoTable .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+#end

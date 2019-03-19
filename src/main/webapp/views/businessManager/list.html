@@ -1,0 +1,91 @@
+#@admin_layout()
+#define admin_main()
+<div class="layui-btn-group demoTable">
+    <div class="layui-btn-group demoTable">
+        <button class="layui-btn" data-type="add">新增</button>
+    </div>
+    <div class="public-search">
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" name="keyWords" id="keyWords" lay-verify=""
+                   placeholder="关键词">
+        </div>
+        <a class="layui-btn" id="search">搜索</a>
+    </div>
+</div>
+
+<table class="layui-hide" id="test" lay-filter="demo"></table>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+#end
+
+
+#define admin_script()
+<script type="text/javascript">
+    layui.use('table', function () {
+        var table = layui.table;
+
+        table.render({
+            elem: '#test'
+            , url: '/businessManager/list'
+            , cellMinWidth: 80
+            , cols: [[
+                {field: 'id', title: 'ID', sort: true}
+                , {field: 'name', title: '名称'}
+                , {field: 'contact', title: '联系方式'}
+                , {field: 'area_manager_id', title: '大区经理'}
+                , {field: 'city_id', title: '省份'}
+                , {field: 'create_time', title: '创建时间', sort: true}
+                , {field: 'create_user_id', title: '创建人'}
+                , {field: 'update_time', title: '更新时间'}
+                , {field: 'update_user', title: '更新人'}
+                , {title: '操作', toolbar: '#barDemo'}
+            ]]
+            , page: true
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(demo)', function (obj) {
+            console.log(obj)
+        });
+        //监听工具条
+        table.on('tool(demo)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'detail') {
+                layer.msg('ID：' + data.id + ' 的查看操作');
+            } else if (obj.event === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if (obj.event === 'edit') {
+                layer.alert('编辑行：<br>' + JSON.stringify(data))
+            }
+        });
+
+        $("#search").click(function () {
+            table.reload("test", {
+                where: {
+                    'search': $("#keyWords").val(),
+                    'sort': 'create_time',
+                    'order': 'desc'
+                }
+            });
+        });
+
+
+        var $$ = layui.$, active = {
+            add: function () { //获取选中数据
+                location.href = "/areaManager/add";
+            }
+        };
+
+        $$('.demoTable .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+#end

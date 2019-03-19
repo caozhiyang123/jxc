@@ -1,0 +1,55 @@
+#define layout()
+#include("_header.html")
+#include("_footer.html")
+#include("_side.html")
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>jfinal-layui-demo</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="icon" href="/detail/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/lib/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/front.css" media="all">
+    <link rel="stylesheet" href="/css/font_511346_3abgpjmquo50cnmi.css" media="all">
+    <link rel="stylesheet" href="/css/paginator.css" media="all">
+    <script src="/lib/layui/layui.all.js" charset="utf-8"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    #@css?()
+</head>
+<body class="layui-bg-gray" id="sleep_home" onselectstart="return false" oncontextmenu="return false">
+#@header()
+<div class="layui-container layui-clear">
+    <div class="layui-row layui-col-space10 #(type_class)">
+        <div class="layui-col-md8">
+            #@main()
+        </div>
+        <div class="layui-col-md4">
+            #@side()
+        </div>
+    </div>
+</div>
+<div class="layui-footer layui-clear">
+    <div class="layui-container">
+        <div class="layui-row layui-col-space20">
+            #@footer()
+        </div>
+    </div>
+</div>
+<ul class="layui-fixbar">
+    <li class="layui-icon layui-fixbar-top" lay-type="top" style="display: list-item;"></li>
+</ul>
+#@javascript?()
+</body>
+</html>
+#end

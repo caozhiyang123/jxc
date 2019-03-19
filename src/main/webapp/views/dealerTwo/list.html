@@ -1,0 +1,63 @@
+#@admin_layout()
+
+#define admin_main()
+<style type="text/css">
+    .layui-fixbar {
+        position: fixed;
+        right: 25px;
+        bottom: 65px;
+        z-index: 9999;
+    }
+    .layui-table-page {
+        position:fixed;
+    }
+    .jxc-warn {
+        color: #FF5722
+    }
+</style>
+<div class="layui-tab layui-tab-brief" lay-filter="demo">
+
+    <ul class="layui-tab-title">
+        #if(isEditVacancyList == true)
+        <li class="layui-this">待填写数据</li>
+        #end
+        <li class="#(isEditVacancyList == false ? 'layui-this' : '')">#(roleName == '商务经理' ? '待填写数据' : '待审核数据')</li>
+    </ul>
+    <div class="layui-tab-content">
+        #if(isEditVacancyList == true)
+        <div class="layui-tab-item layui-show">
+            #include("vacancyList.html")
+        </div>
+        #end
+
+        <div class="layui-tab-item #(isEditVacancyList == false ? 'layui-show' : '')">
+            #include("editList.html")
+        </div>
+    </div>
+</div>
+#end
+
+#define admin_script()
+<script type="text/javascript">
+    var roleName = '#(roleName)';
+    var isEditVacancyList = '#(isEditVacancyList)';
+//    $(function () {
+//        $(document).on("mouseover",'.jxc-tips',function(){
+//            var that = this;
+//            layer.tips('数据与之前理论库存不符', that, {tips:1,time:1000});
+//        });
+//        $(document).on("mouseover",'.diff-cause-tips',function(){
+//            var that = this;
+//            layer.tips('需要填写库存差异原因', that, {tips:1,time:1000});
+//        });
+//        $(document).on("mouseover",'.nature-number-tips',function(){
+//            var that = this;
+//            layer.tips('请填写自然数', that, {tips:1,time:1000});
+//        });
+//    });
+</script>
+#end
+#if(isEditVacancyList == true)
+    #@vacancy_script()
+#end
+#@edit_script()

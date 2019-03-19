@@ -1,0 +1,282 @@
+#define admin_layout()
+#include("_admin_header.html")
+#include("_admin_footer.html")
+#include("_admin_side.html")
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>进销存管理系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>进销存管理系统</title>
+    <link rel="stylesheet" href="#(contextPath)/lib/layui/css/layui.css">
+    <link rel="stylesheet" href="#(contextPath)/lib/layui/css/formSelects-v4.css">
+    <link rel="stylesheet" href="#(contextPath)/css/admin.css">
+    <script src="#(contextPath)/js/jquery-3.3.1.min.js"></script>
+    <script src="#(contextPath)/js/common.js"></script>
+    <style>
+        .public-content {
+            padding: 0 10px;
+        }
+
+        .public-search {
+            float: right;
+        }
+
+        .can-edit-data {
+            background-color: #FFFF88;
+            color: #000000
+        }
+    </style>
+    #@admin_css?()
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        #@admin_header()
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        #@admin_side()
+    </div>
+
+    <div class="layui-body">
+        <div style="padding: 15px;">
+            #@admin_main()
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        #@admin_footer()
+    </div>
+</div>
+<div id="pss"></div>
+<script src="#(contextPath)/lib/layui/layui.js"></script>
+<script src="#(contextPath)/lib/layui/formSelects-v4.min.js" charset="utf-8"></script>
+<script>
+    //JavaScript代码区域
+    var layer;
+    layui.use('element', function () {
+        var element = layui.element;
+    });
+    layui.use(['layer'], function () {
+        layer = layui.layer;
+    });
+    $(function () {
+        var item_id = window.localStorage.getItem("item_id");
+        var child_item_id = window.localStorage.getItem("child_item_id");
+        if (item_id != undefined && item_id != null && item_id != "") {
+            $(".layui-nav-item").each(function () {
+                if ($(this).attr("item_id") == item_id) {
+                    $(this).addClass("layui-nav-itemed");
+                } else {
+                    $(this).removeClass("layui-nav-itemed");
+                }
+            })
+
+            $(".child_menu").each(function () {
+                if ($(this).attr("item_id") == child_item_id) {
+                    $(this).addClass("layui-this");
+                } else {
+                    $(this).removeClass("layui-this");
+                }
+            })
+        }
+    });
+
+
+    var child_item_id;
+    $(".child_menu a").click(function () {
+        child_item_id = $(this).parent(".child_menu").attr("item_id");
+        var target_url = $(this).attr("target_url");
+        window.localStorage.setItem("child_item_id", child_item_id);
+        location.href = target_url;
+    })
+
+
+    var item_id;
+    $(".layui-nav-item").click(function () {
+        item_id = $(this).attr("item_id");
+        $(".layui-nav-item").each(function () {
+            if ($(this).attr("item_id") == item_id) {
+                $(this).addClass("layui-nav-itemed");
+            } else {
+                $(this).removeClass("layui-nav-itemed");
+            }
+        })
+        window.localStorage.setItem("item_id", item_id);
+    })
+
+    function showTips(msg, time, endFunction) {
+
+        var t = 800;
+        if (typeof time != "undefined") {
+            t = time;
+        }
+        layer.msg(msg, {
+            offset: ['60px', '50%'],
+            time: t,//毫秒
+            zIndex: layer.zIndex,
+            end: function () {
+                if (typeof endFunction != "undefined") {
+                    if ($.isFunction(endFunction)) endFunction();
+                }
+
+            }
+        });
+    }
+
+    function showConfirm(msg, endFunction) {
+        //示范一个公告层
+        layer.open({
+            type: 1
+            , title: "提醒" //不显示标题栏
+            , closeBtn: false
+            , area: '300px;'
+            , shade: 0.8
+            , id: 'LAY_layuipro' //设定一个id，防止重复弹出
+            , btn: ['确认']
+            , btnAlign: 'c'
+            , moveType: 1 //拖拽模式，0或者1
+            , content: '<div style="padding: 20px; line-height: 22px; font-weight: 600;">' + msg + '</div>'
+            , success: function (layero) {
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    var globalTable;
+    //表格是否重新加载
+    var reload = false;
+    layui.use('table', function () {
+        globalTable = layui.table;
+    });
+
+    var globalIndex = 0;
+
+    /**
+     *
+     * @param editFields
+     *  eg:
+     *     ["id", "title", "content"]
+     */
+    function renderTable(tableConfig, editFields, callback) {
+        var fields = [];
+        if (editFields) {
+            fields = editFields.split(",");
+            for (var i = 0; i < fields.length; i++) {
+                var str = fields[i].replace(/.*\((\S+)\).*$/, '$1');
+                fields[i] = str;
+            }
+        }
+
+        //代表第几个表格
+        globalIndex++;
+        var index = globalIndex;
+        var globalColumn = [];
+        var cols = tableConfig.cols[0];
+        for (var i = 0; i < cols.length; i++) {
+            var column = cols[i];
+
+            if (fields.indexOf(column.field) >= 0) {
+                column.edit = "text";
+                globalColumn.push(column.field);
+            }
+        }
+        tableConfig.done = function (res, curr, count) {
+            if (res.code == 1) {
+                showTips(res.message, 2000);
+            }
+
+            if (reload) {
+                globalIndex++;
+                index = globalIndex;
+            }
+
+            var nowTable = $("div[lay-filter='LAY-table-" + index + "']");
+            $.each(globalColumn, function (index, vall) {
+                nowTable.find("th[data-field='" + vall + "']").addClass("can-edit-data");
+            });
+            tableConfig.nowTable = nowTable;
+            if (typeof callback != 'undefined' && typeof callback == 'function') {
+                callback(res, curr, count);
+            }
+        };
+        var tablesss = layui.table.render(tableConfig);
+        return tablesss;
+    }
+
+    var reloadTable = function (table_id, tableConfig) {
+        reload = true;
+        globalTable.reload("" + table_id + "", tableConfig);
+    };
+
+    function changePassword() {
+        $("#pss").load("#(contextPath??)/getPageHtml?folderPath=user/changePassword", {}, function () {
+            layui.form.render();
+            layer.open({
+                type: 1,
+                title: '修改密码',
+                area: ['500px', '330px'],
+                btn: ['确定修改', '取消'],
+                content: $("#pss"),
+                yes: function () {
+                    debugger
+                    if ($("#new_password").val().trim().length < 6) {
+                        $("#msg").html("新密码的长度不能少于6位,请重新填写");
+                        $("#new_password").val("");
+                        $("#confirm_password").val("");
+                        $("#new_password").focus();
+                        return;
+                    }
+                    if ($("#new_password").val().trim() != $("#confirm_password").val().trim()) {
+                        $("#msg").html("新密码和确认密码不一致,请重新填写");
+                        $("#new_password").focus();
+                        return;
+                    }
+                    $.ajax({
+                        type: "get",
+                        url: "#(contextPath??)/user/resetPasswordForIndex",
+                        data: {
+                            new_password: $("#new_password").val(),
+                            old_password: $("#old_password").val()
+                        },
+                        async: false,
+                        error: function (request) {
+                            alert("Connection error");
+                        },
+                        success: function (data) {
+                            if (data.code == '0') {
+                                layer.closeAll();
+                                layer.msg("修改成功", {
+                                    offset: 'c',
+                                    time: 800,//毫秒
+                                    zIndex: layer.zIndex
+                                });
+                            } else if (data.code == '8') {
+                                layer.closeAll();
+                                //跳转到登录页面
+                                layer.msg("登录超时，即将跳转到登录页", {
+                                    offset: 'c',
+                                    time: 2000,//毫秒
+                                    zIndex: layer.zIndex,
+                                    end: function () {
+                                        parent.location.reload();//完成刷新
+                                    }
+                                });
+                            } else {
+                                $("#msg").html(data.message);
+                            }
+                        }
+                    });
+                }, end: function () {
+                    $("#pss").empty();
+                }
+            });
+        });
+    }
+
+</script>
+#@admin_script?()
+</body>
+</html>
+#end

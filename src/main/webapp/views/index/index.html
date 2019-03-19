@@ -1,0 +1,46 @@
+#@layout()
+#define main()
+<div class="layui-panal">
+    <div class="layui-panal-title layui-otherpanal-title"></div>
+    <div class="layui-panal-content">
+        <div class="layui-article">
+            #for (x: blogs.getList())
+            <div>
+                <h1><a title="#(x.title)" href="/detail/#(x.id)">#(x.title)</a></h1>
+                <p>
+                    <span><i class="iconfont icon-riqi"></i><label>#(x.create_time)</label></span>
+                    <span><i class="iconfont icon-liulan"></i>#(x.uv)次浏览</span>
+                </p>
+                <div class="Article-list">
+                    <div class="Article-content">
+                        #(x.disc)…
+                        <span><a title="#(x.title)" href="/detail/#(x.id)">[阅读全文]</a></span>
+                    </div>
+                </div>
+            </div>
+            #end
+        </div>
+    </div>
+    <div class="paginator" id="paginator"></div>
+</div>
+#end
+
+#define javascript()
+<script>
+    layui.use('laypage', function(){
+        var laypage = layui.laypage;
+        laypage.render({
+            elem: 'paginator' //注意不用加 # 号
+            ,count: "#(blogs.totalRow)" //数据总数，从服务端得到
+            ,curr: "#(blogs.pageNumber)"
+            ,jump: function(obj, first){
+                //首次不执行
+                if(!first){
+                    location.href = "/"+obj.curr;
+
+                }
+            }
+        });
+    });
+</script>
+#end

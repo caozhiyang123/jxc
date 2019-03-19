@@ -1,0 +1,77 @@
+<style>
+    .layui-body {
+        overflow-y: scroll;
+    }
+
+    body {
+        overflow-y: scroll;
+    }
+</style>
+<div class="container">
+    <form class="layui-form">
+        <div class="public-search">
+            <div class="layui-input-inline">
+                <label class="layui-form-label">产品</label>
+                <div class="layui-input-block">
+                    <select name="product" xm-select="product_select" xm-select-search="" xm-select-height="36px">
+                    </select>
+                </div>
+            </div>
+
+            #if(role_name == '总部' )
+            <div class="layui-input-inline">
+                <label class="layui-form-label">大区</label>
+                <div class="layui-input-block">
+                    <select name="area" id="area" xm-select="area_select" xm-select-height="36px"
+                            style="width: 200px">
+                    </select>
+                </div>
+            </div>
+            #end
+
+            #if(role_name == '总部' || role_name == '大区经理')
+            <div class="layui-input-inline">
+                <label class="layui-form-label">省份</label>
+                <div class="layui-input-block">
+                    <select name="region" xm-select="region_select" id="region_select_dom"
+                            xm-select-height="36px" xm-select-search="">
+                    </select>
+                </div>
+            </div>
+            #end
+
+            #if(role_name == '总部' || role_name == '大区经理')
+            <div class="layui-input-inline">
+                <label class="layui-form-label">商务经理</label>
+                <div class="layui-input-block">
+                    <select name="business_manager_id" xm-select="business_select"
+                            xm-select-height="36px" xm-select-search="">
+                    </select>
+                </div>
+            </div>
+            #end
+
+            <div class="layui-input-inline">
+                <label class="layui-form-label">经销商</label>
+                <div class="layui-input-block">
+                    <select name="dealer" xm-select="dealer_select"
+                            xm-select-height="36px" xm-select-search="">
+                    </select>
+                </div>
+            </div>
+            <button class="layui-btn" id="search" type="button" onclick="searchEvent_ytj()">搜索</button>
+            <button class="layui-btn" id="export_data" type="button" onclick="export_ytx_sj()">导出</button>
+        </div>
+    </form>
+</div>
+<fieldset class="layui-elem-field layui-col-md12"
+          style="margin-top: 20px;border-color: rgb(230, 230, 230) white white white">
+    <div style="float: left;margin-top: 20px;" id="div_table">
+        <table lay-filter="oneLevel_filter" id="oneLevel" style="overflow-x:scroll">
+        </table>
+    </div>
+    <div style="position:absolute;bottom:-55px;left: 45%">
+        <a class="layui-btn layui-btn-normal" onclick="showErrorCyyy()">保存</a>
+    </div>
+</fieldset>
+

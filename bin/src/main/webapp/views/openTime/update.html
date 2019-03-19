@@ -1,0 +1,141 @@
+#@admin_layout()
+#define admin_main()
+<div class="container">
+    <div class="layui-btn-group demoTable">
+        <a href="#(contextPath)/openTime/getOpenTime" class="layui-btn" data-type="add">返回</a>
+    </div>
+</div>
+
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>现在是：<span id="year"></span>年<span id="month"></span>月<span
+            id="day"></span>日
+    </legend>
+</fieldset>
+
+<form id="commit_form">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>T1商开放期</legend>
+    </fieldset>
+    <blockquote class="layui-elem-quote" style="margin-top: 20px;height: 100px">
+        <div>
+        <span style="float: left;margin-left: 5%">
+            第一个开放期开始时间：
+            <span style="width: 400px;">
+                系统自动计算
+           </span>
+         </span>
+
+            <span style="float: right;margin-right: 30%;">
+            第一个开放期结束时间：
+                 <input type="number" value="#(openTime.first_end_day??)" name="first_end_day"
+                        id="first_end_day" max="31" min="1"
+                        required>号
+        </span>
+        </div>
+        <hr class="layui-bg-green">
+
+        <div>
+        <span style="float: left;margin-left: 5%">
+           第一个锁定期结束时间：
+            <span>
+                <input type="number" value="#(openTime.first_lock_end_day??)" name="first_lock_end_day"
+                       id="first_lock_end_day" max="31"
+                       min="1" required>号
+           </span>
+         </span>
+
+            <span style="float: right;margin-right: 30%">
+                第二个开放期结束时间：
+            <span>
+                <input type="number" value="#(openTime.second_end_day??)" name="second_end_day"
+                       id="second_end_day" max="31"
+                       min="1" required>号
+          </span>
+        </span>
+        </div>
+
+        <hr class="layui-bg-green">
+        <div>
+        <span style="float: left;margin-left: 5%">
+                第二个锁定期结束时间：
+            <span>
+                   系统自动计算
+          </span>
+         </span>
+            <span style="float: right;margin-right: 30%">
+        </span>
+        </div>
+        <hr class="layui-bg-green">
+    </blockquote>
+
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>T2商开放期</legend>
+    </fieldset>
+    <blockquote class="layui-elem-quote" style="margin-top: 20px;height: 80px">
+        <div>
+        <span style="float: left;margin-left: 10%">
+            第一个开放期开始时间：
+            <span style="width: 400px;">
+                系统自动计算
+           </span>
+         </span>
+
+            <span style="float: right;margin-right: 40%;">
+               第一个开放期结束时间：
+            <span>
+             <input type="number" value="#(openTime2.first_end_day??)" name="o.first_end_day"
+                    id="o.first_end_day" max="31" min="1"
+                    required>号
+          </span>
+        </span>
+        </div>
+
+        <hr class="layui-bg-green">
+
+        <div>
+        <span style="float: left;margin-left: 10%">
+            第一个锁定期结束时间：
+            <span>
+                系统自动计算
+          </span>
+         </span>
+        </div>
+        <hr class="layui-bg-green">
+    </blockquote>
+
+    <button style="margin-left: 40%" type="button" id="commit" class="layui-btn">保存</button>
+</form>
+#end
+
+#define admin_script()
+<script>
+    $(function () {
+        setDate();
+        $("#commit").click(function () {
+            $("#commit").attr("disabled", "disabled");
+            $("#commit").addClass("layui-btn-disabled");
+            $.postForm("#(contextPath)/openTime/save", $("#commit_form").serialize(), function (data) {
+                showTips("保存成功", 800, function () {
+                    location.href = "#(contextPath)/openTime/getOpenTime"
+                });
+            }, function (err) {
+                showTips("保存失败，失败原因:" + err.message, 3000, function () {
+                        $("#commit").removeAttr("disabled");
+                        $("#commit").removeClass("layui-btn-disabled");
+                    }
+                )
+            })
+        })
+    })
+
+    function setDate() {
+        var mydate = new Date();
+        var fullYear = mydate.getFullYear();
+        $("#year").html(fullYear);
+        var month = mydate.getMonth() + 1;
+        $("#month").html(month);
+        var date = mydate.getDate();
+        $("#day").html(date);
+    }
+</script>
+#end

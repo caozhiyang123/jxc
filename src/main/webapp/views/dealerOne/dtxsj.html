@@ -1,0 +1,69 @@
+<div class="container">
+    <form class="layui-form">
+        <div class="public-search">
+            <div class="layui-input-inline">
+                <label class="layui-form-label">产品</label>
+                <div class="layui-input-block">
+                    <select name="product_dtx" xm-select="product_select_dtx" xm-select-search=""
+                            xm-select-height="36px">
+                    </select>
+                </div>
+            </div>
+
+            #if(role_name == '总部' )
+            <div class="layui-input-inline">
+                <label class="layui-form-label">大区</label>
+                <div class="layui-input-block">
+                    <select name="area_dtx" id="area_dtx" xm-select="area_select_dtx" xm-select-height="36px">
+                    </select>
+                </div>
+            </div>
+            #end
+
+            #if(role_name == '总部' || role_name == '大区经理')
+            <div class="layui-input-inline">
+                <label class="layui-form-label">省份</label>
+                <div class="layui-input-block">
+                    <select name="region_dtx" lay-verify="required" xm-select="region_select_dtx"
+                            xm-select-height="36px" xm-select-search="">
+                    </select>
+                </div>
+            </div>
+            #end
+
+            <!--#if(role_name == '总部' || role_name == '大区经理')-->
+            <!--<div class="layui-input-inline">-->
+            <!--<label class="layui-form-label">商务经理</label>-->
+            <!--<div class="layui-input-block">-->
+            <!--<select name="deale_dtx" lay-verify="required" xm-select="business_select_dtx"-->
+            <!--xm-select-height="36px" xm-select-search="">-->
+            <!--</select>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--#end-->
+
+            <div class="layui-input-inline">
+                <label class="layui-form-label">经销商</label>
+                <div class="layui-input-block">
+                    <select name="dealer_dtx" lay-verify="required" xm-select="dealer_select_dtx"
+                            xm-select-height="36px" xm-select-search="">
+                    </select>
+                </div>
+            </div>
+            <button class="layui-btn" id="search" type="button" onclick="searchEvent_dtx()">搜索</button>
+            <button class="layui-btn" id="export_data" type="button" onclick="export_dtx_sj()">导出</button>
+        </div>
+    </form>
+</div>
+<fieldset class="layui-elem-field layui-col-md12"
+          style="margin-top: 20px;border-color: rgb(230, 230, 230) white white white">
+    <legend id="product_name_lable_dtx"></legend>
+    <div style="float: left;margin-top: 20px;" id="dtx_table_div">
+        <table lay-filter="one_level_dtx_filter" id="one_level_dtx">
+        </table>
+    </div>
+    <div style="position:absolute;bottom:-35px;left: 45%">
+        <a class="layui-btn layui-btn-normal" onclick="showErrorCyyy2()">保存</a>
+    </div>
+</fieldset>
+

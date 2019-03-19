@@ -1,0 +1,11 @@
+<table lay-filter="product_total_filter" id="product_total">
+</table>
+
+
+<div style="background-color: red ;float: left;position:absolute;bottom: 20px;left: 45%">
+    #if(product_purpose_status ==0)
+    <a class="layui-btn layui-btn-normal" onclick="commitProductTotal()">提交</a>
+    #else
+    <a href="#" class="layui-btn layui-btn-normal">系统计算期。。。</a>
+    #end
+</div>
