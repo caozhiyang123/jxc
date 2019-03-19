@@ -2,6 +2,7 @@ package com.site.service;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.rmi.server.ExportException;
 import java.sql.SQLException;
 import java.util.*;
@@ -314,7 +316,11 @@ public class DealerOneService extends BaseService {
             });
         }
 
+        
+        
+        Map<String, AtomicDouble> oneDecimalMap = new HashMap<String, AtomicDouble>();
         Map<String, FirstDealerInventoryData> oneMap = new HashMap<String, FirstDealerInventoryData>();
+        Map<String, AtomicDouble> twoDecimalMap = new HashMap<String, AtomicDouble>();
         Map<String, SecondaryDealerInventoryData> twoMap = new HashMap<String, SecondaryDealerInventoryData>();
         
         //上月销售实际T1 T2
@@ -346,7 +352,7 @@ public class DealerOneService extends BaseService {
 
                         //第一次覆盖，后续还有这条就要开始加总
                         String mapKey = "P"+product.getId()+"D"+ dealer.getId()+"L"+ lastMonth + "_xs";
-                        if (!oneMap.containsKey(mapKey)) {
+                        if (!oneMap.containsKey(mapKey) || !oneDecimalMap.containsKey(mapKey)) {
                         	//这就说明是第一次来,直接覆盖
                             FirstDealerInventoryData lastMonthData = FirstDealerInventoryData.dao.findFirst("select * from first_dealer_inventory_data where product_id=? and dealer_id =? and month = ?", product.getId(), dealer.getId(), lastMonth);
                             lastMonthData = lastMonthData == null ? FirstDealerInventoryData.init(dealer, loginUser) : lastMonthData;
@@ -357,26 +363,29 @@ public class DealerOneService extends BaseService {
                             }
                             lastMonthData.setActualSalesQuantityHeadOffice(sySjXsl.longValue());
                         	oneMap.put(mapKey, lastMonthData);
+                        	oneDecimalMap.put(mapKey, new AtomicDouble(sySjXsl.doubleValue()));
                         } else {
                             //这就说明不是第一次来，要加总之前的
-                        	FirstDealerInventoryData lastMonthData = oneMap.get(mapKey);
+                        	/*FirstDealerInventoryData lastMonthData = oneMap.get(mapKey);
                         	Long old = lastMonthData.getActualSalesQuantityHeadOffice();
-                            lastMonthData.setActualSalesQuantityHeadOffice(sySjXsl.longValue() + old);
+                            lastMonthData.setActualSalesQuantityHeadOffice(sySjXsl.longValue() + old);*/
+                        	oneDecimalMap.get(mapKey).addAndGet(sySjXsl.doubleValue());
                         }
 
-/*                        if (lastMonthData.getId() == null) {
+                        FirstDealerInventoryData oneLastMonthData = oneMap.get(mapKey);
+                       if (oneLastMonthData.getId() == null) {
                             //这里要新增，因为总部导入了，那么就代表这数据肯定有
-                            lastMonthData.setMonth(lastMonth);
-                            lastMonthData.setProductId(product.getId());
-                            lastMonthData.save();
-                        } else {
+                    	   oneLastMonthData.setMonth(lastMonth);
+                    	   oneLastMonthData.setProductId(product.getId());
+                    	   oneLastMonthData.save();
+                        } /* else {
                             lastMonthData.update();
                         }*/
-                        //calculateIds.put("1_" + lastMonthData.getId() + "_xs", 1);
+                        calculateIds.put("1_" + oneLastMonthData.getId() + "_xs", 1);
                     } else if ("2".equalsIgnoreCase(dealer.getLevel())) {
                         //第一次覆盖，后续还有这条就要开始加总
                         String mapKey = "P"+product.getId()+"D"+ dealer.getId()+"L"+ lastMonth + "_xs";
-                        if (!twoMap.containsKey(mapKey)) {
+                        if (!twoMap.containsKey(mapKey) || !twoDecimalMap.containsKey(mapKey)) {
                         	//这就说明是第一次来,直接覆盖
                         	SecondaryDealerInventoryData lastMonthData = SecondaryDealerInventoryData.dao.findFirst("select * from secondary_dealer_inventory_data where product_id=? and dealer_id =? and month = ?", product.getId(), dealer.getId(), lastMonth);
                         	lastMonthData = lastMonthData == null ? SecondaryDealerInventoryData.init(dealer, loginUser) : lastMonthData;
@@ -387,25 +396,36 @@ public class DealerOneService extends BaseService {
                         	}
                         	lastMonthData.setActualSalesQuantityHeadOffice(sySjXsl.longValue());
                         	twoMap.put(mapKey, lastMonthData);
+                        	twoDecimalMap.put(mapKey, new AtomicDouble(sySjXsl.doubleValue()));
                         } else {
                             //这就说明不是第一次来，要加总之前的
-                        	SecondaryDealerInventoryData lastMonthData = twoMap.get(mapKey);
+                        	/*SecondaryDealerInventoryData lastMonthData = twoMap.get(mapKey);
                         	Long old = lastMonthData.getActualSalesQuantityHeadOffice();
-                            lastMonthData.setActualSalesQuantityHeadOffice(sySjXsl.longValue() + old);
+                            lastMonthData.setActualSalesQuantityHeadOffice(sySjXsl.longValue() + old);*/
+                        	twoDecimalMap.get(mapKey).addAndGet(sySjXsl.doubleValue());
                         }
-                        /*if (lastMonthData.getId() == null) {
+                        SecondaryDealerInventoryData twoLastMonthData = twoMap.get(mapKey);
+                        if (twoLastMonthData.getId() == null) {
                             //这里要新增，因为总部导入了，那么就代表这数据肯定有
-                            lastMonthData.setMonth(lastMonth);
-                            lastMonthData.setProductId(product.getId());
-                            lastMonthData.save();
-                        } else {
+                        	twoLastMonthData.setMonth(lastMonth);
+                        	twoLastMonthData.setProductId(product.getId());
+                        	twoLastMonthData.save();
+                        } /*else {
                             lastMonthData.update();
                         }
-                        calculateIds.put("2_" + lastMonthData.getId() + "_xs", 2);*/
+                        */
+                        calculateIds.put("2_" + twoLastMonthData.getId() + "_xs", 2);
                     }
                     return true;
                 }
             });
+        }
+        
+        for (Map.Entry<String, FirstDealerInventoryData> map : oneMap.entrySet()) {
+        	map.getValue().setActualSalesQuantityHeadOffice(Math.round(oneDecimalMap.get(map.getKey()).get()));
+		}
+        for (Map.Entry<String, SecondaryDealerInventoryData> map : twoMap.entrySet()) {
+        	map.getValue().setActualSalesQuantityHeadOffice(Math.round(twoDecimalMap.get(map.getKey()).get()));
         }
         
         Db.tx(new IAtom() {
@@ -428,6 +448,7 @@ public class DealerOneService extends BaseService {
 					Db.batch("insert into first_dealer_inventory_data (id,dealer_id,area_id,region_id,area_manager_user_id,business_manager_user_id,month,product_id,actual_sales_quantity_head_office,create_time,create_user_id,update_user_id,update_time) "
 							+ "values(?,?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE actual_sales_quantity_head_office = ?"
 							, oneArr, oneArr.length);
+					System.out.println();
 				} catch (Exception e1) {
 					e1.printStackTrace();
 					return false;
